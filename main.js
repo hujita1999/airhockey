@@ -71,8 +71,6 @@ function Puck(x, y) {
     
         }
 
-    
-
     };
 
     self.draw = function (context) {
@@ -252,7 +250,7 @@ function clamp(val, min, max){
 
 }
 
-function vecLength (v) {
+function vecLength(v) {
     return Math.sqrt(v.x * v.x + v.y * v.y);
 
 }
@@ -286,7 +284,7 @@ function init() {
         paddle1.onKeyDown(e.keycode);
         paddle2.onKeyDown(e.keycode);
 
-        if (e.keycode === 13 && gameIsOver()) {
+        if (e.keyode === 13 && gameIsOver()) {
             resetGame();
         }
 
