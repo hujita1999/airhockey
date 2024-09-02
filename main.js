@@ -41,6 +41,7 @@ function Puck(x, y) {
 
             if (!gameIsOver()) {
                 score1++;
+                playSound(goalsound);
                 self.reset(BoardDirection.Right);
 
             }
@@ -53,6 +54,7 @@ function Puck(x, y) {
 
             if (!gameIsOver()) {
                  score2++;
+                 playSound(goalsound);
                  self.reset(BoardDirection.Left);
 
             }
@@ -162,6 +164,8 @@ function Puck(x, y) {
             self.vel.y = self.vel.y - (2 * dotProd * normal.y);
             self.speed += 0.03;
 
+            playSound(hitsound);
+
         }
 
     };
@@ -269,6 +273,11 @@ function dot(u, v) {
 
 }
 
+function playSound(sound) {
+    sound.currentTime = 0;
+    sound.play();
+}
+
 function init() {
     canvas = document.getElementById("game-canvas");
     canvas.width = boardWidth;
@@ -277,6 +286,12 @@ function init() {
     puck = new Puck(100, 100);
     paddle1 = new Paddle(10, "KeyW", "KeyS");
     paddle2 = new Paddle(boardWidth - 10, "ArrowUp", "ArrowDown");
+
+    hitsound = document.getElementById('hitsound')
+    goalsound = document.getElementById('goalsound')
+    
+    hitsound.volume = 0.2;
+    goalsound.volume = 0.2;
 
     document.addEventListener("keydown", function (e) {
         e.preventDefault();
@@ -350,7 +365,8 @@ function drawCenteredText(context, text, y) {
 }
 
 function render(dt) {
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "rgba(0, 0, 0, 0.1)";
+    context.fillRect(0, 0, canvas.width, canvas.height);
     puck.draw(context);
     paddle1.draw(context);
     paddle2.draw(context);
