@@ -172,7 +172,7 @@ function Paddle(x, upKeyCode, downKeyCode) {
     var self = this;
 
     self.x = x;
-    self.y - boardHeight / 2;
+    self.y = boardHeight / 2;
 
     self.halfWidth = 5;
     self.halfHeight = 20;
@@ -275,26 +275,26 @@ function init() {
     canvas.height = boardHeight;
 
     puck = new Puck(100, 100);
-    paddle1 = new Paddle(10, 87, 83);
-    paddle2 = new Paddle(boardWidth - 10, 38, 40);
+    paddle1 = new Paddle(10, "KeyW", "KeyS");
+    paddle2 = new Paddle(boardWidth - 10, "ArrowUp", "ArrowDown");
 
     document.addEventListener("keydown", function (e) {
         e.preventDefault();
 
-        paddle1.onKeyDown(e.keycode);
-        paddle2.onKeyDown(e.keycode);
+        paddle1.onKeyDown(e.code);
+        paddle2.onKeyDown(e.code);
 
-        if (e.keyode === 13 && gameIsOver()) {
+        if (e.code === "Enter" && gameIsOver()) {
             resetGame();
         }
 
     });
 
-    document.addEventListener("keyup", function (e){
+    document.addEventListener("keyup", function (e) {
         e.preventDefault();
 
-        paddle1.onKeyUp(e.keycode);
-        paddle2.onKeyUp(e.keycode);
+        paddle1.onKeyUp(e.code);
+        paddle2.onKeyUp(e.code);
 
     });
 
