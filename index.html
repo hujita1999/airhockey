@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
- <head>
+<head>
     <meta charset="utf-8">
     <title>Airhockey</title>
     <meta name="viewport" content="user-scalable=no"/>
     <link rel="stylesheet" type="text/css" href="main.css">
- </head> 
-
- <body>
+</head>
+<body>
     <canvas id="game-canvas"></canvas>
     <audio id="hitsound" src="hitsound.mp3"></audio>
     <audio id="goalsound" src="goalsound.mp3"></audio>
- </body>
 
- <script src="main.js"></script>
-</html>    
+    <select id="difficulty-select">
+        <option value="1">Easy</option>
+        <option value="2">Normal</option>
+        <option value="3">Hard</option>
+    </select>
+</body>
+<script src="main.js"></script>
+</html>
