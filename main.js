@@ -9,11 +9,12 @@ var paddle1;
 var paddle2;
 var score1 = 0;
 var score2 = 0;
+var difficultyLevel = 1;
+var gameStarted = false;
 
 var BoardDirection = {
     Left: 0,
     Right: 1
-
 };
 
 function Puck(x, y) {
@@ -26,7 +27,6 @@ function Puck(x, y) {
     self.vel = {
         x: 0.2,
         y: 0.1
-    
     };
 
     normalize(self.vel);
@@ -43,9 +43,7 @@ function Puck(x, y) {
                 score1++;
                 playSound(goalsound);
                 self.reset(BoardDirection.Right);
-
             }
-
         }
 
         if (self.x - self.radius < 0) {
@@ -53,26 +51,21 @@ function Puck(x, y) {
             self.x = self.radius;
 
             if (!gameIsOver()) {
-                 score2++;
-                 playSound(goalsound);
-                 self.reset(BoardDirection.Left);
-
+                score2++;
+                playSound(goalsound);
+                self.reset(BoardDirection.Left);
             }
-
         }
 
         if (self.y + self.radius > boardHeight) {
             self.vel.y *= -1;
             self.y = boardHeight - self.radius;
-        
         }
 
         if (self.y - self.radius < 0) {
             self.vel.y *= -1;
             self.y = self.radius;
-    
         }
-
     };
 
     self.draw = function (context) {
@@ -80,7 +73,6 @@ function Puck(x, y) {
         context.beginPath();
         context.arc(self.x, self.y, self.radius, 0, 2 * Math.PI);
         context.fill();
-
     };
 
     self.reset = function (boardDirection) {
@@ -93,13 +85,11 @@ function Puck(x, y) {
             randomPoint = {
                 x: 0,
                 y: Math.random() * boardHeight
-
             };
         } else if (boardDirection === BoardDirection.Right) {
             randomPoint = {
                 x: boardWidth,
                 y: Math.random() * boardHeight
-
             };
         }
 
@@ -109,7 +99,6 @@ function Puck(x, y) {
         };
 
         normalize(self.vel);
-        
     }
 
     self.collidesWithPaddle = function (paddle) {
@@ -118,22 +107,18 @@ function Puck(x, y) {
         var diff = {
             x: self.x - closestPoint.x,
             y: self.y - closestPoint.y
-
         };
 
         var length = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
 
         return length < self.radius;
-
     };
 
     self.closestPointOnPaddle = function (paddle) {
         return {
             x: clamp(self.x, paddle.x - paddle.halfWidth, paddle.x + paddle.halfWidth),
             y: clamp(self.y, paddle.y - paddle.halfHeight, paddle.y + paddle.halfHeight)
-
         };
-
     };
 
     self.handlePaddleCollision = function (paddle) {
@@ -144,7 +129,6 @@ function Puck(x, y) {
             self.y -= self.vel.y;
 
             collisionHappened = true;
-
         }
 
         if (collisionHappened) {
@@ -153,7 +137,6 @@ function Puck(x, y) {
             var normal = {
                 x: self.x - closestPoint.x,
                 y: self.y - closestPoint.y
-
             };
 
             normalize(normal);
@@ -165,14 +148,11 @@ function Puck(x, y) {
             self.speed += 0.03;
 
             playSound(hitsound);
-
         }
-
     };
-
 }
 
-function Paddle(x, upKeyCode, downKeyCode) {
+function Paddle(x, upKeyCode, downKeyCode, isComputer) {
     var self = this;
 
     self.x = x;
@@ -185,49 +165,70 @@ function Paddle(x, upKeyCode, downKeyCode) {
     self.downButtonPressed = false;
     self.upKeyCode = upKeyCode;
     self.downKeyCode = downKeyCode;
+    self.isComputer = isComputer;
 
     self.onKeyDown = function (keyCode) {
-        if (keyCode === self.upKeyCode) {
-            self.upButtonPressed = true;
+        if (!self.isComputer) {
+            if (keyCode === self.upKeyCode) {
+                self.upButtonPressed = true;
+            }
+
+            if (keyCode === self.downKeyCode) {
+                self.downButtonPressed = true;
+            }
         }
-
-        if (keyCode === self.downKeyCode) {
-            self.downButtonPressed = true;
-        }
-
-
     };
 
     self.onKeyUp = function (keyCode) {
-        if (keyCode === self.upKeyCode) {
-            self.upButtonPressed = false;
-        }
+        if (!self.isComputer) {
+            if (keyCode === self.upKeyCode) {
+                self.upButtonPressed = false;
+            }
 
-        if (keyCode === self.downKeyCode) {
-            self.downButtonPressed = false;
+            if (keyCode === self.downKeyCode) {
+                self.downButtonPressed = false;
+            }
         }
-
     };
 
     self.update = function (dt) {
-        if (self.upButtonPressed) {
-            self.y -= self.moveSpeed * dt;
-        }
+        if (self.isComputer) {
+            var paddleSpeed;
 
-        if (self.downButtonPressed) {
-            self.y += self.moveSpeed * dt;
+            switch (difficultyLevel) {
+                case 1:
+                    paddleSpeed = 0.1;
+                    break;
+                case 2:
+                    paddleSpeed = 0.3;
+                    break;
+                case 3:
+                    paddleSpeed = 0.5;
+                    break;
+            }
+
+            if (self.y + self.halfHeight < puck.y) {
+                self.y += paddleSpeed * dt;
+            } else if (self.y - self.halfHeight > puck.y) {
+                self.y -= paddleSpeed * dt;
+            }
+        } else {
+            if (self.upButtonPressed) {
+                self.y -= self.moveSpeed * dt;
+            }
+
+            if (self.downButtonPressed) {
+                self.y += self.moveSpeed * dt;
+            }
         }
 
         if (self.y - self.halfHeight < 0) {
             self.y = self.halfHeight;
-
         }
 
         if (self.y + self.halfHeight > boardHeight) {
             self.y = boardHeight - self.halfHeight;
-            
         }
-
     };
 
     self.draw = function (context) {
@@ -239,24 +240,19 @@ function Paddle(x, upKeyCode, downKeyCode) {
             self.halfWidth * 2,
             self.halfHeight * 2
         );
-
     };
 
     self.reset = function () {
         self.y = boardHeight / 2;
-
     };
-
 }
 
-function clamp(val, min, max){
+function clamp(val, min, max) {
     return Math.max(min, Math.min(max, val));
-
 }
 
 function vecLength(v) {
     return Math.sqrt(v.x * v.x + v.y * v.y);
-
 }
 
 function normalize(v) {
@@ -270,7 +266,6 @@ function normalize(v) {
 
 function dot(u, v) {
     return u.x * v.x + u.y * v.y;
-
 }
 
 function playSound(sound) {
@@ -284,11 +279,11 @@ function init() {
     canvas.height = boardHeight;
 
     puck = new Puck(100, 100);
-    paddle1 = new Paddle(10, "KeyW", "KeyS");
-    paddle2 = new Paddle(boardWidth - 10, "ArrowUp", "ArrowDown");
+    paddle1 = new Paddle(10, "KeyW", "KeyS", false);
+    paddle2 = new Paddle(boardWidth - 10, null, null, true);
 
-    hitsound = document.getElementById('hitsound')
-    goalsound = document.getElementById('goalsound')
+    hitsound = document.getElementById('hitsound');
+    goalsound = document.getElementById('goalsound');
     
     hitsound.volume = 0.2;
     goalsound.volume = 0.2;
@@ -296,32 +291,36 @@ function init() {
     document.addEventListener("keydown", function (e) {
         e.preventDefault();
 
-        paddle1.onKeyDown(e.code);
-        paddle2.onKeyDown(e.code);
-
-        if (e.code === "Enter" && gameIsOver()) {
-            resetGame();
+        if (e.code === "Enter") {
+            if (!gameStarted) {
+                gameStarted = true;
+                resetGame();
+            } else if (gameIsOver()) {
+                resetGame();
+            }
         }
 
+        paddle1.onKeyDown(e.code);
     });
 
     document.addEventListener("keyup", function (e) {
         e.preventDefault();
 
         paddle1.onKeyUp(e.code);
-        paddle2.onKeyUp(e.code);
+    });
 
+    var difficultySelect = document.getElementById("difficulty-select");
+    difficultySelect.addEventListener("change", function () {
+        difficultyLevel = parseInt(difficultySelect.value, 10);
     });
 
     context = canvas.getContext("2d");
 
     lastTime = performance.now();
-
 }
 
 function gameIsOver() {
     return score1 >= 11 || score2 >= 11;
-
 }
 
 function resetGame() {
@@ -332,28 +331,29 @@ function resetGame() {
 
     score1 = 0;
     score2 = 0;
-
 }
 
 function update(dt) {
-    puck.update(dt);
-    paddle1.update(dt);
-    paddle2.update(dt);
+    if (gameStarted) {
+        puck.update(dt);
+        paddle1.update(dt);
+        paddle2.update(dt);
 
-    puck.handlePaddleCollision (paddle1);
-    puck.handlePaddleCollision (paddle2);
+        puck.handlePaddleCollision(paddle1);
+        puck.handlePaddleCollision(paddle2);
+    }
 }
 
 function drawScore(context, score, boardDirection) {
-    var score = String(score);
+    var scoreText = String(score);
     context.font = "20px Sans";
-    var width = context.measureText(score).width;
+    var width = context.measureText(scoreText).width;
     var centerOffset = 60;
 
     if (boardDirection === BoardDirection.Left) {
-        context.fillText(score, (boardWidth / 2) - width - centerOffset, 30);
+        context.fillText(scoreText, (boardWidth / 2) - width - centerOffset, 30);
     } else {
-        context.fillText(score, (boardWidth / 2) + centerOffset, 30);
+        context.fillText(scoreText, (boardWidth / 2) + centerOffset, 30);
     }
 }
 
@@ -374,12 +374,13 @@ function render(dt) {
     drawScore(context, score1, BoardDirection.Left);
     drawScore(context, score2, BoardDirection.Right);
 
-    if (gameIsOver()) {
+    if (!gameStarted) {
+        drawCenteredText(context, "Press Enter to Start", (boardHeight / 2));
+    } else if (gameIsOver()) {
         drawCenteredText(context, "Game Over", (boardHeight / 2));
         drawCenteredText(context, "Press Enter to Retry", (boardHeight / 2) + 30);
     }
-
-};
+}
 
 function main() {
     var now = performance.now();
@@ -388,7 +389,6 @@ function main() {
 
     if (dt > maxFrameTime) {
         dt = maxFrameTime;
-    
     }
 
     update(dt);
@@ -397,7 +397,6 @@ function main() {
     lastTime = now;
 
     requestAnimationFrame(main);
-
 }
 
 init();
